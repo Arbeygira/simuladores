@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#edf1ef">
+  <title>Forma EEG — Montaje 10–20</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; --paper:#edf1ef; --white:#fff; --ink:#1d2928; --muted:#788480; --line:#dfe6e2; --teal:#167c72; --blue:#527da0; --deep:#152222; --mono:"DM Mono",Consolas,monospace; --sans:"DM Sans","Segoe UI",sans-serif; --display:"Manrope","Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-width:320px; background:var(--paper); color:var(--ink); font:14px var(--sans); }
+    button,input { font:inherit; }
+    .topbar { min-height:58px; padding:0 32px; display:flex; align-items:center; justify-content:space-between; gap:16px; background:#ffffffeb; border-bottom:1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap:11px; min-width:175px; text-decoration:none; color:inherit; }
+    .brand-mark { width:31px; height:31px; display:grid; place-items:center; border-radius:8px; background:#254c57; color:#fff; }
+    .brand-mark svg { width:20px; height:20px; }
+    .brand-name { font:800 16px var(--display); }
+    .brand-sub { margin-top:1px; color:var(--muted); font-size:10px; }
+    .nav { display:flex; gap:4px; padding:4px; border:1px solid var(--line); border-radius:8px; background:#f5f7f6; }
+    .nav button { padding:9px 15px; border:0; border-radius:5px; background:transparent; color:#687572; font-size:12px; font-weight:600; cursor:pointer; }
+    .nav button[aria-selected="true"] { color:var(--ink); background:white; box-shadow:0 1px 3px #22312a15; }
+    .room-indicator { display:grid; gap:2px; margin-left:auto; padding:5px 9px; border:1px solid var(--line); border-radius:5px; color:#66736c; font:9px var(--mono); }
+    .room-indicator strong { color:var(--teal); font-size:8px; font-weight:500; }
+    .link { color:var(--teal); font-size:11px; font-weight:600; text-decoration:none; white-space:nowrap; }
+    .link:hover { text-decoration:underline; }
+    main { max-width:1440px; margin:0 auto; padding:15px 32px 8px; }
+    .view { display:none; animation:enter .25s ease both; }
+    .view.active { display:block; }
+    #controlView[hidden] { display:none; }
+    @keyframes enter { from {opacity:0;transform:translateY(5px)} to {opacity:1;transform:translateY(0)} }
+    .heading { display:flex; align-items:end; justify-content:space-between; gap:16px; margin-bottom:10px; }
+    .eyebrow { color:var(--teal); font:10px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+    h1 { margin:4px 0 0; font:700 23px/1.15 var(--display); }
+    .hint { color:var(--muted); font-size:12px; }
+    .subnav { display:flex; gap:7px; margin-bottom:17px; }
+    .button { min-height:37px; padding:0 14px; border:1px solid var(--line); border-radius:6px; color:var(--ink); background:white; font-size:11px; font-weight:600; cursor:pointer; }
+    .button:hover { background:#f5f8f6; }
+    .button.primary { border-color:#167c72; background:#167c72; color:white; }
+    .button.primary:hover { background:#126c63; }
+    .layout { display:grid; grid-template-columns:minmax(0,1fr) 290px; gap:16px; align-items:start; }
+    .stack { display:grid; gap:14px; }
+    .panel { overflow:hidden; border:1px solid var(--line); border-radius:8px; background:var(--white); }
+    .panel-head { padding:11px 14px 9px; display:flex; justify-content:space-between; align-items:center; gap:10px; border-bottom:1px solid #edf1ee; }
+    .panel-title { font:700 13px var(--display); }
+    .panel-note { margin-top:4px; color:var(--muted); font-size:10px; }
+    .section-tag { color:#84928d; font:10px var(--mono); }
+    .control-row { min-height:50px; padding:7px 14px; display:grid; grid-template-columns:minmax(130px,1fr) minmax(120px,1.2fr) 78px; align-items:center; gap:10px; border-bottom:1px solid #eef1ee; }
+    .control-row:last-child { border:0; }
+    .control-label { font-size:12px; font-weight:600; }
+    .control-hint { margin-top:3px; color:#8a9690; font-size:10px; }
+    input[type=range] { width:100%; accent-color:var(--teal); }
+    .number-wrap { display:flex; justify-content:end; align-items:center; gap:6px; }
+    .number { width:54px; padding:7px 5px; border:1px solid var(--line); border-radius:5px; background:#fbfcfb; color:var(--ink); text-align:right; font:11px var(--mono); }
+    .unit { min-width:22px; color:var(--muted); font:10px var(--mono); }
+    .alteration-controls { padding:4px 18px 14px; }
+    .select-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px 0; border-bottom:1px solid #eef1ee; }
+    .select-field label,.severity-label { display:block; margin-bottom:6px; color:#71807b; font-size:10px; font-weight:600; }
+    .select-field select { width:100%; min-height:36px; padding:0 9px; border:1px solid var(--line); border-radius:5px; background:#fbfcfb; color:var(--ink); font-size:11px; }
+    .severity-row { grid-template-columns:1fr 120px 62px; min-height:55px; padding:10px 0; }
+    .alteration-explanation { padding:10px 0 2px; color:#71807b; font-size:10px; line-height:1.5; }
+    .summary { position:sticky; top:16px; }
+    .summary-top { padding:13px 16px; background:var(--deep); color:white; }
+    .summary-label { color:#a8bab5; font:10px var(--mono); text-transform:uppercase; }
+    .summary-value { margin-top:8px; font:600 37px/1 var(--display); }
+    .summary-value small { color:#a8bab5; font:11px var(--mono); }
+    .summary-row { min-height:34px; margin:0 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #edf1ee; font-size:10px; }
+    .summary-row:last-of-type { border:0; }
+    .summary-row span { color:var(--muted); }
+    .summary-row strong { font:11px var(--mono); }
+    .summary-actions { display:grid; gap:6px; padding:10px 13px 13px; }
+    .disclaimer { margin-top:8px; padding-top:7px; border-top:1px solid var(--line); color:#89948f; font-size:9px; line-height:1.4; }
+    .montage-shell { overflow:hidden; border:1px solid #dfd3a8; border-radius:8px; background:#f5eabf; }
+    .montage-head { min-height:32px; padding:0 12px; display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid #e1d5aa; background:#f1e5b7; color:#46564e; font:9px var(--mono); }
+    .montage-live { display:flex; align-items:center; gap:7px; color:#84d6a3; }
+    .dot { width:7px; height:7px; border-radius:50%; background:#65df82; box-shadow:0 0 0 3px #65df8218; }
+    .montage-body { padding:5px 7px; background:#f5eabf; }
+    .montage-zone { overflow:hidden; margin-bottom:5px; border:1px solid #e1d5aa; border-radius:4px; background:#fff8df; }
+    .zone-heading { min-height:22px; padding:0 8px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #e6dab0; background:#fbf2d3; color:#46564e; font:9px var(--mono); text-transform:uppercase; }
+    .zone-heading span:last-child { color:#7b826e; font-size:8px; }
+    .zone-canvas { display:block; width:100%; height:144px; background:#fff9e4; }
+    #midlineCanvas { height:38px; }
+    .ekg-zone { overflow:hidden; margin-top:5px; border:1px solid #e1d5aa; border-radius:4px; background:#fff8df; }
+    .ekg-canvas { display:block; width:100%; height:46px; background:#fff9e4; }
+    .arms-canvas { display:block; width:100%; height:48px; background:#fff9e4; }
+    .montage-explanation { padding:5px 9px; border-top:1px solid #e1d5aa; background:#f7ecc8; color:#58665c; font-size:9px; line-height:1.35; }
+    .arm-reference { min-height:38px; padding:3px 14px; display:grid; grid-template-columns:1fr 110px 1fr; align-items:center; border-top:1px solid #e1d5aa; background:#fbf2d3; color:#46564e; font:8px var(--mono); }
+    .arm-node { display:flex; align-items:center; gap:8px; color:#59675e; }
+    .arm-node.right { justify-content:flex-end; text-align:right; }
+    .arm-node small { color:#7c826e; font:8px var(--mono); }
+    .electrode-dot { width:9px; height:9px; flex:none; border:2px solid #167c72; border-radius:50%; box-shadow:0 0 0 3px #167c721a; }
+    .patient-outline { height:30px; position:relative; display:flex; align-items:center; justify-content:center; }
+    .body-core { width:18px; height:24px; border:1px solid #668079; border-radius:8px 8px 6px 6px; }
+    .body-core::before { content:""; position:absolute; top:0; left:calc(50% - 4px); width:8px; height:8px; border:1px solid #8b8a6c; border-radius:50%; background:#fbf2d3; }
+    .arm-segment { position:absolute; top:12px; width:35px; height:1px; background:#8b8a6c; }
+    .arm-segment.left { right:calc(50% + 11px); transform:rotate(-17deg); transform-origin:right; }
+    .arm-segment.right { left:calc(50% + 11px); transform:rotate(17deg); transform-origin:left; }
+    .montage-foot { padding:5px 10px; border-top:1px solid #e1d5aa; background:#f1e5b7; display:flex; justify-content:space-between; gap:10px; color:#687462; font:8px var(--mono); }
+    #monitorView .heading { margin-bottom:6px; }
+    .monitor-actions { display:flex; gap:8px; }
+    .clock { color:var(--muted); font:10px var(--mono); }
+    .toast { position:fixed; right:20px; bottom:20px; z-index:3; padding:10px 14px; border-radius:6px; background:var(--deep); color:#fff; font-size:11px; opacity:0; transform:translateY(8px); transition:.2s; pointer-events:none; }
+    .toast.show { opacity:1; transform:translateY(0); }
+    @media(max-width:820px) { .topbar{padding:0 18px} main{padding:12px 18px 13px} .layout{grid-template-columns:1fr} .summary{position:static} .summary-rows{display:grid;grid-template-columns:1fr 1fr} }
+    @media(max-width:540px) { .topbar{padding:9px 12px;flex-wrap:wrap;gap:9px} .brand{min-width:0} .brand-sub{display:none} .nav{order:3;width:100%} .nav button{flex:1} main{padding:10px 10px 12px} .heading{align-items:start;flex-direction:column;gap:7px} h1{font-size:20px} .hint{font-size:10px} .control-row{grid-template-columns:minmax(95px,.9fr) minmax(65px,1fr) 70px;gap:8px;padding:7px 10px;min-height:44px} .panel-head{padding:9px 11px 7px} .control-label{font-size:10px} .control-hint{font-size:9px} .number{width:48px;font-size:10px} .alteration-controls{padding:3px 10px 10px} .select-row{gap:8px;padding:8px 0} .severity-row{grid-template-columns:1fr 78px 55px} .montage-body{padding:4px} .montage-head{font-size:8px;padding:0 7px;min-height:29px} .montage-foot{font-size:7px;padding:5px 7px} .arm-reference{grid-template-columns:1fr 70px 1fr;padding:2px 6px;min-height:34px} .arm-segment{width:24px} }
+    @media(max-height:800px) { .topbar{min-height:52px} main{padding-top:8px;padding-bottom:8px} .heading{margin-bottom:6px} .montage-head{min-height:28px} .montage-zone{margin-bottom:3px} .zone-heading{min-height:19px} .zone-canvas{height:128px} #midlineCanvas{height:32px} .ekg-zone{margin-top:3px} .ekg-canvas,.arms-canvas{height:38px} .arm-reference{min-height:32px;padding:2px} .patient-outline{height:26px} .montage-explanation{padding:4px 8px} .montage-foot{padding:4px 8px} .disclaimer{margin-top:5px;padding-top:5px} }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important} }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="eeg.html" aria-label="Simulador EEG Forma">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2-6 4 12 2-6h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <span><span class="brand-name">forma</span><span class="brand-sub"> · Neurofisiología</span></span>
+    </a>
+    <nav class="nav" aria-label="Vistas del simulador EEG">
+      <button type="button" data-view="control" aria-selected="true">Manipulador</button>
+      <button type="button" data-view="monitor" aria-selected="false">Visualizador</button>
+    </nav>
+    <a class="link" href="index.html">Simulador de signos vitales →</a>
+  </header>
+  <main>
+    <section class="view active" id="controlView" aria-labelledby="controlHeading">
+      <div class="heading"><div><div class="eyebrow">Simulador independiente / EEG</div><h1 id="controlHeading">Manipulador de actividad cerebral</h1></div><div class="hint">Parámetros sintéticos para el montaje completo.</div></div>
+      <div class="layout">
+        <section class="panel" aria-label="Parámetros EEG">
+          <div class="panel-head"><div><div class="panel-title">Señal electroencefalográfica</div><div class="panel-note">Las variaciones se aplican a las 18 derivaciones bipolares.</div></div><span class="section-tag">10–20 / EEG</span></div>
+          <div class="control-row"><div><div class="control-label">Frecuencia dominante</div><div class="control-hint">Ritmo de oscilación</div></div><input type="range" min="1" max="40" step="1" value="10" data-param="frequency" aria-label="Frecuencia dominante"><div class="number-wrap"><input class="number" type="number" min="1" max="40" step="1" value="10" data-number="frequency" aria-label="Frecuencia dominante"><span class="unit">Hz</span></div></div>
+          <div class="control-row"><div><div class="control-label">Amplitud</div><div class="control-hint">Voltaje pico aproximado</div></div><input type="range" min="10" max="150" step="1" value="50" data-param="amplitude" aria-label="Amplitud EEG"><div class="number-wrap"><input class="number" type="number" min="10" max="150" step="1" value="50" data-number="amplitude" aria-label="Amplitud EEG"><span class="unit">µV</span></div></div>
+          <div class="control-row"><div><div class="control-label">Ruido</div><div class="control-hint">Variación de fondo</div></div><input type="range" min="0" max="40" step="1" value="8" data-param="noise" aria-label="Ruido EEG"><div class="number-wrap"><input class="number" type="number" min="0" max="40" step="1" value="8" data-number="noise" aria-label="Ruido EEG"><span class="unit">%</span></div></div>
+          <div class="panel-head"><div><div class="panel-title">Alteración para explicación</div><div class="panel-note">El patrón se aplica a la zona seleccionada.</div></div><span class="section-tag">DIDÁCTICO</span></div>
+          <div class="alteration-controls">
+            <div class="select-row">
+              <div class="select-field"><label for="alterationSelect">Patrón</label><select id="alterationSelect" data-param="alteration"><option value="none">Sin alteración</option><option value="slowing">Lentitud focal</option><option value="spikes">Puntas focales</option><option value="suppression">Supresión focal</option><option value="generalized">Descarga punta-onda generalizada</option></select></div>
+              <div class="select-field"><label for="regionSelect">Región</label><select id="regionSelect" data-param="region"><option value="left">Izquierdo</option><option value="midline">Línea media</option><option value="right">Derecho</option><option value="all">Todas</option></select></div>
+            </div>
+            <div class="control-row severity-row"><div><div class="control-label">Intensidad</div><div class="control-hint">Magnitud visible de la alteración</div></div><input type="range" min="10" max="100" step="5" value="60" data-param="severity" aria-label="Intensidad de la alteración"><div class="number-wrap"><input class="number" type="number" min="10" max="100" step="5" value="60" data-number="severity" aria-label="Intensidad de la alteración"><span class="unit">%</span></div></div>
+            <div class="alteration-explanation" id="alterationExplanation" role="status" aria-live="polite">Señal de base sin patrón añadido.</div>
+          </div>
+        </section>
+        <aside class="panel summary" aria-label="Resumen del montaje EEG">
+          <div class="summary-top"><div class="summary-label">Montaje activo</div><div class="summary-value">18 <small>canales</small></div></div>
+          <div class="summary-rows">
+            <div class="summary-row"><span>Sistema</span><strong>10–20</strong></div>
+            <div class="summary-row"><span>Configuración</span><strong>Doble banana</strong></div>
+            <div class="summary-row"><span>Electrodos</span><strong>19</strong></div>
+            <div class="summary-row"><span>Frecuencia</span><strong id="summaryFrequency">10 Hz</strong></div>
+            <div class="summary-row"><span>Amplitud</span><strong id="summaryAmplitude">50 µV</strong></div>
+            <div class="summary-row"><span>Patrón</span><strong id="summaryAlteration">Sin alteración</strong></div>
+            <div class="summary-row"><span>Región</span><strong id="summaryRegion">Izquierdo</strong></div>
+          </div>
+          <div class="summary-actions"><button class="button primary" id="openMonitor">Abrir montaje EEG</button><button class="button" id="reset">Restablecer valores</button><button class="button" id="toggleRun">Pausar señal</button></div>
+        </aside>
+      </div>
+      <div class="disclaimer">Simulación educativa de señales EEG. No representa una adquisición clínica ni debe emplearse para diagnóstico.</div>
+    </section>
+    <section class="view" id="monitorView" aria-labelledby="monitorHeading">
+      <div class="heading"><div><div class="eyebrow">Montaje bipolar longitudinal / 18 derivaciones</div><h1 id="monitorHeading">Electroencefalograma</h1></div><div class="monitor-actions"><button class="button" id="backToControl">← Parámetros EEG</button><button class="button primary" id="monitorToggle">Pausar señal</button></div></div>
+      <section class="montage-shell" aria-label="Montaje EEG completo">
+        <div class="montage-head"><span>EEG · SISTEMA INTERNACIONAL 10–20 · DOBLE BANANA</span><span class="montage-live"><span class="dot" id="liveDot"></span><span id="liveStatus">EN CURSO</span></span></div>
+        <div class="montage-body">
+          <section class="montage-zone" aria-label="Canales del hemisferio izquierdo"><div class="zone-heading"><span>Izquierdo</span><span>8 derivaciones</span></div><canvas class="zone-canvas" id="leftCanvas" aria-label="Canales EEG izquierdos"></canvas></section>
+          <section class="montage-zone" aria-label="Canales de línea media"><div class="zone-heading"><span>Línea media</span><span>2 derivaciones</span></div><canvas class="zone-canvas" id="midlineCanvas" aria-label="Canales EEG de línea media"></canvas></section>
+          <section class="montage-zone" aria-label="Canales del hemisferio derecho"><div class="zone-heading"><span>Derecho</span><span>8 derivaciones</span></div><canvas class="zone-canvas" id="rightCanvas" aria-label="Canales EEG derechos"></canvas></section>
+          <section class="ekg-zone" aria-label="EKG derivación I"><div class="zone-heading"><span>EKG · Derivación I</span><span>RA → LA</span></div><canvas class="ekg-canvas" id="ekgCanvas" aria-label="Trazado EKG simulado"></canvas>
+          </section>
+          <section class="ekg-zone" aria-label="Trazados de ambos brazos"><div class="zone-heading"><span>Brazos · señales de electrodos</span><span>RA / LA</span></div><canvas class="arms-canvas" id="armsCanvas" aria-label="Trazados de los brazos derecho e izquierdo"></canvas>
+            <div class="arm-reference" aria-label="Electrodos de ambos brazos para EKG">
+              <div class="arm-node"><span class="electrode-dot"></span><span>RA<br><small>Brazo derecho</small></span></div>
+              <div class="patient-outline" aria-hidden="true"><span class="arm-segment left"></span><span class="body-core"></span><span class="arm-segment right"></span></div>
+              <div class="arm-node right"><span>LA<br><small>Brazo izquierdo</small></span><span class="electrode-dot"></span></div>
+            </div>
+          </section>
+        </div>
+        <div class="montage-explanation" id="monitorExplanation" role="status" aria-live="polite">Señal de base sin patrón añadido.</div>
+        <div class="montage-foot"><span id="alterationReadout">SIN ALTERACIÓN · 18 CANALES</span><span id="clock">00:00:00</span></div>
+      </section>
+      <div class="disclaimer">Montaje referencial de 18 derivaciones bipolares basado en el sistema 10–20. Señales sintéticas con fines educativos únicamente.</div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="collaboration.js"></script>
+  <script>
+    (() => {
+      const collaboration = window.SimulatorCollaboration;
+      if (!collaboration?.requireSession()) return;
+      collaboration.initializeHeader();
+      const session = collaboration.session;
+      if (session.role === 'student') {
+        document.getElementById('controlView').hidden = true;
+        document.querySelector('.nav').remove();
+        document.getElementById('monitorView').classList.add('active');
+        document.getElementById('backToControl').remove();
+        document.getElementById('monitorToggle').remove();
+      }
+      const defaults = { frequency: 10, amplitude: 50, noise: 8, alteration: 'none', region: 'left', severity: 60 };
+      const values = { ...defaults };
+      const zones = {
+        left: ['Fp1–F7', 'F7–T3', 'T3–T5', 'T5–O1', 'Fp1–F3', 'F3–C3', 'C3–P3', 'P3–O1'],
+        midline: ['Fz–Cz', 'Cz–Pz'],
+        right: ['Fp2–F8', 'F8–T4', 'T4–T6', 'T6–O2', 'Fp2–F4', 'F4–C4', 'C4–P4', 'P4–O2']
+      };
+      const zoneCanvases = Object.fromEntries(Object.keys(zones).map(zone => [zone, document.getElementById(`${zone}Canvas`)]));
+      const ekgCanvas = document.getElementById('ekgCanvas');
+      const armsCanvas = document.getElementById('armsCanvas');
+      let running = true;
+      let elapsed = 0;
+      let lastFrame = 0;
+      let toastTimer;
+      let applyingRemoteState = false;
+      let syncChannel;
+      const format = value => Number.isInteger(value) ? String(value) : Number(value).toFixed(1);
+
+      const alterationNames = { none: 'Sin alteración', slowing: 'Lentitud focal', spikes: 'Puntas focales', suppression: 'Supresión focal', generalized: 'Punta-onda generalizada' };
+      const alterationColors = { slowing: '#a34d67', spikes: '#c44638', suppression: '#9a7620', generalized: '#7050a5' };
+      const alterationDescriptions = {
+        none: 'Señal de base sin patrón añadido.',
+        slowing: 'Ritmo más lento y de mayor amplitud en la zona elegida.',
+        spikes: 'Puntas repetitivas superpuestas a la actividad de fondo en la zona elegida.',
+        suppression: 'Amplitud atenuada en la zona elegida para comparar con los otros sectores.',
+        generalized: 'Complejos punta-onda representados de forma síncrona en las tres zonas.'
+      };
+      const regionNames = { left: 'Izquierdo', midline: 'Línea media', right: 'Derecho', all: 'Todas' };
+      const currentEegState = () => ({ ...values });
+      const publishEegState = () => syncChannel?.publish(currentEegState());
+
+      function updateReadouts() {
+        document.getElementById('summaryFrequency').textContent = `${values.frequency} Hz`;
+        document.getElementById('summaryAmplitude').textContent = `${values.amplitude} µV`;
+        document.getElementById('summaryAlteration').textContent = alterationNames[values.alteration];
+        const effectiveRegion = values.alteration === 'generalized' ? 'Todas' : regionNames[values.region];
+        document.getElementById('summaryRegion').textContent = effectiveRegion;
+        const region = values.alteration === 'generalized' ? 'Todas las zonas' : regionNames[values.region];
+        document.getElementById('alterationReadout').textContent = values.alteration === 'none' ? 'SIN ALTERACIÓN · 18 CANALES' : `${alterationNames[values.alteration].toUpperCase()} · ${region.toUpperCase()} · ${values.severity}%`;
+        document.getElementById('alterationExplanation').textContent = alterationDescriptions[values.alteration];
+        document.getElementById('monitorExplanation').textContent = alterationDescriptions[values.alteration];
+        document.getElementById('regionSelect').disabled = values.alteration === 'generalized';
+      }
+
+      function setParam(name, raw) {
+        const range = document.querySelector(`[data-param="${name}"]`);
+        if (name === 'alteration' || name === 'region') {
+          values[name] = raw;
+          range.value = raw;
+          updateReadouts();
+          if (!applyingRemoteState) publishEegState();
+          return;
+        }
+        const number = document.querySelector(`[data-number="${name}"]`);
+        const parsed = Number(raw);
+        if (!Number.isFinite(parsed)) return;
+        const value = Math.max(Number(range.min), Math.min(Number(range.max), parsed));
+        values[name] = value;
+        range.value = value;
+        number.value = format(value);
+        updateReadouts();
+        if (!applyingRemoteState) publishEegState();
+      }
+      document.querySelectorAll('[data-param]').forEach(input => input.addEventListener(input.tagName === 'SELECT' ? 'change' : 'input', () => setParam(input.dataset.param, input.value)));
+      document.querySelectorAll('[data-number]').forEach(input => input.addEventListener('change', () => setParam(input.dataset.number, input.value)));
+
+      function showView(view) {
+        const monitor = view === 'monitor';
+        document.getElementById('controlView').classList.toggle('active', !monitor);
+        document.getElementById('monitorView').classList.toggle('active', monitor);
+        document.querySelectorAll('[data-view]').forEach(button => button.setAttribute('aria-selected', String(button.dataset.view === view)));
+        if (monitor) resizeCanvases();
+      }
+      document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
+      document.getElementById('openMonitor').addEventListener('click', () => showView('monitor'));
+      document.getElementById('backToControl')?.addEventListener('click', () => showView('control'));
+
+      function setRunningState() {
+        const label = running ? 'Pausar señal' : 'Reanudar señal';
+        document.getElementById('toggleRun').textContent = label;
+        const monitorToggle = document.getElementById('monitorToggle');
+        if (monitorToggle) monitorToggle.textContent = label;
+        document.getElementById('liveStatus').textContent = running ? 'EN CURSO' : 'EN PAUSA';
+        document.getElementById('liveDot').style.background = running ? '#65df82' : '#d6aa57';
+      }
+      function toggleRunning() { running = !running; setRunningState(); }
+      document.getElementById('toggleRun').addEventListener('click', toggleRunning);
+      document.getElementById('monitorToggle')?.addEventListener('click', toggleRunning);
+      document.getElementById('reset').addEventListener('click', () => {
+        Object.entries(defaults).forEach(([name, value]) => setParam(name, value));
+        if (!running) toggleRunning();
+        const toast = document.getElementById('toast');
+        toast.textContent = 'Parámetros EEG restablecidos';
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+      });
+
+      function applyRemoteEeg(state) {
+        applyingRemoteState = true;
+        Object.keys(defaults).forEach(name => {
+          const value = state[name];
+          if (typeof value !== 'string' && !Number.isFinite(Number(value))) return;
+          values[name] = typeof defaults[name] === 'number' ? Number(value) : value;
+          const range = document.querySelector(`[data-param="${name}"]`);
+          range.value = values[name];
+          const number = document.querySelector(`[data-number="${name}"]`);
+          if (number) number.value = format(values[name]);
+        });
+        updateReadouts();
+        applyingRemoteState = false;
+      }
+
+      function resizeCanvases() {
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        [...Object.values(zoneCanvases), ekgCanvas, armsCanvas].forEach(canvas => {
+          const rect = canvas.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          canvas.width = Math.round(rect.width * ratio);
+          canvas.height = Math.round(rect.height * ratio);
+          canvas.getContext('2d').setTransform(ratio, 0, 0, ratio, 0, 0);
+        });
+      }
+
+      function drawGrid(context, width, height, labelWidth) {
+        for (let x = labelWidth; x < width; x += 10) {
+          context.beginPath();
+          context.strokeStyle = (Math.round((x - labelWidth) / 50) % 5 === 0) ? '#d4c690' : '#e8ddb8';
+          context.lineWidth = 1;
+          context.moveTo(x + .5, 0);
+          context.lineTo(x + .5, height);
+          context.stroke();
+        }
+      }
+
+      function appliesTo(zone) {
+        return values.alteration === 'generalized' || values.region === 'all' || values.region === zone;
+      }
+
+      function alteredWave(phase, index, zone, x, time) {
+        const affected = appliesTo(zone) && values.alteration !== 'none';
+        const cycle = ((phase / (Math.PI * 2)) % 1 + 1) % 1;
+        const strength = values.severity / 100;
+        const noise = Math.sin(x * 1.7 + index * 8.9 + time * 31) * Math.sin(x * .47 + index * 5.1 + time * 12) * values.noise / 100;
+        let rhythm = Math.sin(phase) * .72 + Math.sin(phase * .51 + index * .12) * .2 + Math.sin(phase * .23 + index) * .08;
+        if (!affected) return rhythm + noise;
+        if (values.alteration === 'slowing') rhythm = Math.sin(phase * (.09 + (1 - strength) * .14)) * 1.65 + Math.sin(phase * .045) * .28;
+        if (values.alteration === 'spikes') {
+          const spike = Math.exp(-Math.pow((cycle - .48) / .032, 2));
+          const afterWave = Math.exp(-Math.pow((cycle - .57) / .075, 2));
+          rhythm += strength * (4.2 * spike - .9 * afterWave);
+        }
+        if (values.alteration === 'suppression') rhythm *= 1 - strength * .98;
+        if (values.alteration === 'generalized') {
+          const spike = Math.exp(-Math.pow((cycle - .48) / .04, 2));
+          rhythm = Math.sin(phase * .36) * (.65 + strength * .6) + spike * strength * 3.2;
+        }
+        return rhythm + noise;
+      }
+
+      function drawZone(canvas, zone, time) {
+        if (!canvas.width || !canvas.height) return;
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const width = canvas.width / ratio, height = canvas.height / ratio;
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, width, height);
+        const zoneChannels = zones[zone];
+        const slots = zoneChannels.length;
+        const rowHeight = height / slots;
+        const labelWidth = Math.min(72, width * .34);
+        context.font = '10px "DM Mono", Consolas, monospace';
+        context.textBaseline = 'middle';
+        drawGrid(context, width, height, labelWidth);
+        const channelRows = zoneChannels.map((_, index) => index);
+        for (let slot = 0; slot < slots; slot++) {
+          const top = slot * rowHeight;
+          const baseline = top + rowHeight * .52;
+          context.strokeStyle = '#e5d9b1';
+          context.lineWidth = 1;
+          context.beginPath();
+          context.moveTo(labelWidth, top + rowHeight);
+          context.lineTo(width, top + rowHeight);
+          context.stroke();
+          const index = channelRows.indexOf(slot);
+          if (index < 0) continue;
+          context.fillStyle = '#59665e';
+          context.fillText(zoneChannels[index], 7, baseline);
+          const altered = appliesTo(zone) && values.alteration !== 'none';
+          context.strokeStyle = altered ? alterationColors[values.alteration] : '#167c72';
+          context.lineWidth = altered ? 1.8 : 1.25;
+          context.beginPath();
+          const amplitude = Math.min(rowHeight * .37, values.amplitude * rowHeight / 145);
+          const phaseOffset = index * .37;
+          for (let traceX = labelWidth; traceX <= width; traceX += 1.5) {
+            const position = (traceX - labelWidth) / (width - labelWidth);
+            const phase = (position * 5.5 - time * .5) * values.frequency * Math.PI * 2 + phaseOffset;
+            const rhythm = alteredWave(phase, index, zone, traceX, time);
+            const y = baseline - rhythm * amplitude;
+            if (traceX === labelWidth) context.moveTo(traceX, y); else context.lineTo(traceX, y);
+          }
+          context.stroke();
+        }
+      }
+
+      function ekgSample(phase) {
+        const cycle = ((phase % 1) + 1) % 1;
+        const bump = (center, spread, height) => height * Math.exp(-Math.pow((cycle - center) / spread, 2));
+        return bump(.18, .035, .12) - bump(.39, .018, .12) + bump(.415, .009, 1) - bump(.44, .02, .28) + bump(.68, .075, .32);
+      }
+
+      function drawEkg(time) {
+        if (!ekgCanvas.width || !ekgCanvas.height) return;
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const width = ekgCanvas.width / ratio, height = ekgCanvas.height / ratio;
+        const context = ekgCanvas.getContext('2d');
+        context.clearRect(0, 0, width, height);
+        drawGrid(context, width, height, 0);
+        for (let y = .5; y < height; y += 10) {
+          context.strokeStyle = '#eadfbd';
+          context.beginPath();
+          context.moveTo(0, y);
+          context.lineTo(width, y);
+          context.stroke();
+        }
+        context.strokeStyle = '#ad5879';
+        context.lineWidth = 1.6;
+        context.beginPath();
+        for (let x = 0; x <= width; x += 1.5) {
+          const phase = x / width * 3.5 + time * .24;
+          const y = height / 2 - ekgSample(phase) * height * .62;
+          if (x === 0) context.moveTo(x, y); else context.lineTo(x, y);
+        }
+        context.stroke();
+      }
+
+      function drawArms(time) {
+        if (!armsCanvas.width || !armsCanvas.height) return;
+        const ratio = Math.min(window.devicePixelRatio || 1, 2);
+        const width = armsCanvas.width / ratio, height = armsCanvas.height / ratio;
+        const context = armsCanvas.getContext('2d');
+        context.clearRect(0, 0, width, height);
+        const rowHeight = height / 2;
+        const labelWidth = Math.min(150, width * .22);
+        drawGrid(context, width, height, labelWidth);
+        const leads = [
+          { label: 'RA · Brazo derecho', color: '#087d8b', phase: .03, amplitude: .48 },
+          { label: 'LA · Brazo izquierdo', color: '#ad5879', phase: 0, amplitude: .58 }
+        ];
+        leads.forEach((lead, index) => {
+          const top = index * rowHeight;
+          const baseline = top + rowHeight / 2;
+          context.strokeStyle = '#e5d9b1';
+          context.beginPath();
+          context.moveTo(labelWidth, top + rowHeight);
+          context.lineTo(width, top + rowHeight);
+          context.stroke();
+          context.fillStyle = '#59665e';
+          context.font = '10px "DM Mono", Consolas, monospace';
+          context.textBaseline = 'middle';
+          context.fillText(lead.label, 8, baseline);
+          context.strokeStyle = lead.color;
+          context.lineWidth = 1.5;
+          context.beginPath();
+          for (let x = labelWidth; x <= width; x += 1.5) {
+            const phase = (x / width * 3.5 + time * .24 + lead.phase) % 1;
+            const y = baseline - ekgSample(phase) * rowHeight * lead.amplitude;
+            if (x === labelWidth) context.moveTo(x, y); else context.lineTo(x, y);
+          }
+          context.stroke();
+        });
+      }
+
+      function render(timestamp) {
+        if (!lastFrame) lastFrame = timestamp;
+        const delta = Math.min((timestamp - lastFrame) / 1000, .05);
+        lastFrame = timestamp;
+        if (running) elapsed += delta;
+        Object.entries(zoneCanvases).forEach(([zone, canvas]) => drawZone(canvas, zone, elapsed));
+        drawEkg(elapsed);
+        drawArms(elapsed);
+        const seconds = Math.floor(elapsed);
+        document.getElementById('clock').textContent = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60].map(value => String(value).padStart(2, '0')).join(':');
+        requestAnimationFrame(render);
+      }
+      window.addEventListener('resize', resizeCanvases);
+      window.addEventListener('load', resizeCanvases);
+      updateReadouts();
+      syncChannel = collaboration.connect('eeg', applyRemoteEeg);
+      resizeCanvases();
+      requestAnimationFrame(render);
+    })();
+  </script>
+</body>
+</html>

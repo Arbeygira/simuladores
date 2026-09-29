@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#edf1ef">
+  <title>Acceso · Forma Simuladores</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --paper:#edf1ef; --white:#fff; --ink:#1d2928; --muted:#788480; --line:#dfe6e2; --teal:#167c72; --deep:#152222; --mono:"DM Mono",Consolas,monospace; --sans:"DM Sans","Segoe UI",sans-serif; --display:"Manrope","Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { min-width:320px; min-height:100vh; margin:0; background:var(--paper); color:var(--ink); font:14px var(--sans); }
+    .topbar { height:62px; padding:0 32px; display:flex; align-items:center; gap:11px; background:#ffffffeb; border-bottom:1px solid var(--line); }
+    .mark { width:30px; height:30px; display:grid; place-items:center; border-radius:8px; color:white; background:var(--teal); }
+    .mark svg { width:18px; height:18px; }
+    .brand { font:800 16px var(--display); }
+    main { width:min(720px,calc(100% - 36px)); margin:44px auto 60px; }
+    .eyebrow { color:var(--teal); font:10px var(--mono); letter-spacing:.08em; text-transform:uppercase; }
+    h1 { margin:7px 0 6px; font:700 28px/1.15 var(--display); }
+    .intro { margin:0 0 22px; color:var(--muted); font-size:12px; line-height:1.55; }
+    .columns { display:grid; grid-template-columns:1fr 1fr; gap:13px; }
+    .panel { padding:18px; border:1px solid var(--line); border-radius:8px; background:var(--white); }
+    .panel h2 { margin:0 0 5px; font:700 14px var(--display); }
+    .panel p { min-height:34px; margin:0 0 15px; color:var(--muted); font-size:11px; line-height:1.5; }
+    label { display:block; margin:0 0 6px; font-size:10px; font-weight:600; }
+    input { width:100%; min-height:40px; padding:0 10px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:#fbfcfb; font:13px var(--mono); text-transform:uppercase; }
+    input:focus { outline:2px solid #167c7230; border-color:var(--teal); }
+    .button { width:100%; min-height:39px; margin-top:10px; border:1px solid var(--line); border-radius:5px; color:var(--ink); background:white; font-size:11px; font-weight:700; cursor:pointer; }
+    .button.primary { border-color:var(--teal); color:white; background:var(--teal); }
+    .button:hover { filter:brightness(.97); }
+    .status { min-height:18px; margin-top:10px; color:#9d5140; font-size:10px; line-height:1.45; }
+    .status.ok { color:var(--teal); }
+    .existing { display:none; margin-top:13px; padding:13px 15px; border:1px solid #d6e6df; border-radius:6px; background:#f5faf7; }
+    .existing.active { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .existing span { color:var(--muted); font-size:10px; }
+    .existing strong { display:block; margin-top:4px; font:13px var(--mono); }
+    .existing .button { width:auto; flex:none; margin:0; padding:0 12px; }
+    .note { margin-top:16px; color:#89948f; font-size:10px; line-height:1.5; }
+    @media(max-width:600px) { .topbar{padding:0 16px} main{margin:28px auto 36px} h1{font-size:24px} .columns{grid-template-columns:1fr;gap:10px} .panel p{min-height:0;margin-bottom:12px} }
+  </style>
+</head>
+<body>
+  <header class="topbar"><span class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2-6 4 12 2-6h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="brand">forma</span></header>
+  <main>
+    <div class="eyebrow">Simulación compartida</div>
+    <h1>Entrar a una sala</h1>
+    <p class="intro">El docente crea una sala y comparte el código con el grupo. Los estudiantes reciben los monitores en modo de sólo lectura.</p>
+    <div class="columns">
+      <section class="panel" aria-labelledby="teacherTitle">
+        <h2 id="teacherTitle">Docente o expositor</h2>
+        <p>Crea una sala y controla los parámetros de EEG y signos vitales.</p>
+        <button class="button primary" id="createRoom">Crear sala de expositor</button>
+        <div class="status" id="teacherStatus" role="status" aria-live="polite"></div>
+      </section>
+      <section class="panel" aria-labelledby="studentTitle">
+        <h2 id="studentTitle">Estudiante</h2>
+        <p>Ingresa el código de sala para abrir los monitores sin los controles de modificación.</p>
+        <form id="joinForm">
+          <label for="roomInput">Código de sala</label>
+          <input id="roomInput" name="room" minlength="8" maxlength="8" autocomplete="off" spellcheck="false" placeholder="8 CARACTERES" required>
+          <button class="button primary" type="submit">Entrar como estudiante</button>
+        </form>
+        <div class="status" id="studentStatus" role="status" aria-live="polite"></div>
+      </section>
+    </div>
+    <div class="existing" id="existingSession"><div><span>Sala activa en este navegador</span><strong id="existingCode"></strong></div><button class="button" id="resumeSession">Continuar</button></div>
+    <p class="note">Los cambios se comparten mientras el servidor de la sala esté activo. Los escenarios son simulaciones educativas, no mediciones clínicas.</p>
+  </main>
+  <script>
+    (() => {
+      const sessionKey = 'forma.roomSession';
+      const teacherStatus = document.getElementById('teacherStatus');
+      const studentStatus = document.getElementById('studentStatus');
+
+      function enterSession(session) {
+        sessionStorage.setItem(sessionKey, JSON.stringify(session));
+        window.location.assign('index.html');
+      }
+
+      const saved = sessionStorage.getItem(sessionKey);
+      if (saved) {
+        try {
+          const session = JSON.parse(saved);
+          document.getElementById('existingCode').textContent = `${session.room} · ${session.role === 'teacher' ? 'Docente' : 'Estudiante'}`;
+          document.getElementById('existingSession').classList.add('active');
+          document.getElementById('resumeSession').addEventListener('click', () => enterSession(session));
+        } catch { sessionStorage.removeItem(sessionKey); }
+      }
+
+      document.getElementById('createRoom').addEventListener('click', async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        teacherStatus.className = 'status';
+        teacherStatus.textContent = 'Creando sala…';
+        try {
+          const response = await fetch('/api/rooms', { method: 'POST' });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'No se pudo crear la sala.');
+          enterSession({ room: result.code, role: 'teacher', token: result.hostToken });
+        } catch (error) {
+          teacherStatus.textContent = `${error.message} Comprueba que el servidor esté activo.`;
+          button.disabled = false;
+        }
+      });
+
+      document.getElementById('joinForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const room = document.getElementById('roomInput').value.trim().toUpperCase();
+        studentStatus.className = 'status';
+        studentStatus.textContent = 'Buscando sala…';
+        try {
+          const response = await fetch('/api/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ room }) });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.error || 'No se pudo entrar.');
+          enterSession({ room: result.room, role: 'student' });
+        } catch (error) {
+          studentStatus.textContent = error.message;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

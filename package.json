@@ -1,0 +1,14 @@
+{
+  "name": "forma-simuladores",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simuladores educativos de EEG y signos vitales con salas compartidas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
